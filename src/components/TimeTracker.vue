@@ -387,8 +387,7 @@ const addCustomTask = () => {
     // Reset form
     taskTitle.value = '';
     showCustomForm.value = false;
-    
-    console.log('Đã thêm task tùy chỉnh thành công');
+ 
   } catch (error) {
     console.error('Lỗi ', error);
 

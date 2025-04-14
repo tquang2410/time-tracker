@@ -42,57 +42,23 @@
       {{ formattedTime }}
     </div>
 
-    <div class="tasks-list">
-      <h3>Danh sách công việc</h3>
-      <div v-for="task in tasks" :key="task.id" class="task-item">
-        <div class="task-info">
-          <div class="task-title">
-            <template v-if="isEditing === task.id">
-              <div class="edit-form">
-                <input
-                    type="text"
-                    v-model="task.title"
-                    placeholder="Nhập tên task"
-                />
-                <DatePicker
-                    v-model="task.taskDate"
-                    showIcon
-                    inputId="calendar"
-                    dateFormat="dd/mm/yy"
-                    placeholder="Chọn ngày"
-                />
-                <div class="edit-actions">
-                  <button @click="stopEdit">Lưu</button>
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              {{ task.title }}
-            </template>
-          </div>
-<!--              Hiện ngày của task-->
-          <div class="task-date">{{ formatTaskDate(task.taskDate || timestampToDate(task.startTime)) }}</div>
-          
-          <div class="task-actions">
-            <template v-if="isEditing !== task.id">
-              <button @click="startEdit(task.id)">Sửa</button>
-              <button @click="deleteTask(task.id)">Xóa</button>
-            </template>
-          </div>
-        </div>
-        <div class="task-duration">{{ formatDuration(task.duration) }}
-          <button @click="continueTask(task.id)">
-            {{ currentTaskId === task.id && isRunning ? 'Kết thúc' : 'Tiếp tục' }}
-          </button>
-        </div>
-      </div>
-    </div>
+<TaskList
+    :tasks="tasks"
+    :current-task-id="currentTaskId"
+    :is-running="isRunning"
+    :is-editing="isEditing"
+    @delete-task="deleteTask"
+    @start-edit="startEdit"
+    @stop-edit="stopEdit"
+    @continue-task="continueTask"
+/>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import DatePicker from 'primevue/datepicker'
+import TaskList from "@/components/TaskList.vue";
 import { 
   formatTime, 
   formatDuration, 
@@ -220,28 +186,32 @@ const startEdit = (taskId) => {
   isEditing.value = taskId;
 }
 
-const stopEdit = () => {
-  // Nếu đang chỉnh sửa task nào đó
+const stopEdit = (editedData) => {
   if (isEditing.value) {
-    const editingTask = tasks.value.find(task => task.id === isEditing.value);
-    if (editingTask && editingTask.taskDate) {
-      // Sử dụng ngày đã chọn, không bị ảnh hưởng bởi múi giờ
-      const date = new Date(editingTask.taskDate);
-      if (!isNaN(date.getTime())) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        editingTask.taskDate = `${year}-${month}-${day}`;
+    const taskIndex = tasks.value.findIndex(task => task.id === isEditing.value);
+    if (taskIndex !== -1) {
+      // Cập nhật title từ form
+      tasks.value[taskIndex].title = editedData.title;
+      
+      // Cập nhật và format taskDate
+      if (editedData.taskDate) {
+        const date = new Date(editedData.taskDate);
+        if (!isNaN(date.getTime())) {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          tasks.value[taskIndex].taskDate = `${year}-${month}-${day}`;
+        }
       }
     }
   }
-
   isEditing.value = null;
   saveLocal();
 }
 
 const deleteTask = (taskId) => {
   tasks.value = tasks.value.filter(task => task.id !== taskId);
+  saveLocal();
 }
 
 const continueTask = (taskId) => {

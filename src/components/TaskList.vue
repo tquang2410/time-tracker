@@ -11,32 +11,34 @@ const props = defineProps({
 })
 const emit = defineEmits(['deleteTask', 'startEdit', 'stopEdit', 'continueTask']);
 // Hàm xử lý sự kiện
-const deleteTask = (taskId) =>{
+const handleTaskDelete = (taskId) =>{
   emit('deleteTask', taskId)
 }
 const editingData = ref({
   title: '',
-  taskDate: null
+  taskDate: null,
+  // duration: 0
 })
-const startEdit = (taskId) =>{
+const handleTaskEdit = (taskId) =>{
   const task = props.tasks.find(task => task.id === taskId)
   if (task)
   {
     editingData.value = {
       title: task.title,
-      taskDate: task.taskDate
+      taskDate: task.taskDate,
+      // duration: task.duration
     }
   }
   emit('startEdit', taskId)
 }
-const stopEdit = () =>{
+const handleTaskSave = () =>{
 emit('stopEdit',{
   id: props.isEditing,
   title: editingData.value.title,
   taskDate: editingData.value.taskDate
 })
 }
-const continueTask = (taskId) =>{
+const handleTaskContinue = (taskId) =>{
   emit('continueTask', taskId)
 }
 
@@ -63,7 +65,7 @@ const continueTask = (taskId) =>{
                   placeholder="Chọn ngày"
               />
               <div class="edit-actions">
-                <button @click="stopEdit">Lưu</button>
+                <button @click="handleTaskSave">Lưu</button>
               </div>
             </div>
           </template>
@@ -76,14 +78,14 @@ const continueTask = (taskId) =>{
 
         <div class="task-actions">
           <template v-if="isEditing !== task.id">
-            <button @click="startEdit(task.id)">Sửa</button>
-            <button @click="deleteTask(task.id)">Xóa</button>
+            <button @click="handleTaskEdit(task.id)">Sửa</button>
+            <button @click="handleTaskDelete(task.id)">Xóa</button>
 <!--            <button @click="$emit('delete-task', task.id)">Xóa</button>-->
           </template>
         </div>
       </div>
       <div class="task-duration">{{ formatDuration(task.duration) }}
-        <button @click="continueTask(task.id)">
+        <button @click="handleTaskContinue(task.id)">
           {{ currentTaskId === task.id && isRunning ? 'Kết thúc' : 'Tiếp tục' }}
         </button>
       </div>

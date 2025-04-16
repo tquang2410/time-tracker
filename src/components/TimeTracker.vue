@@ -11,33 +11,14 @@
         {{ isRunning ? 'Dừng' : 'Bắt đầu' }}
       </button>
     </div>
-    <!-- Button Tuỳ chọn -->
-    <div class="custom-option">
-      <button @click="toggleCustomForm" :class="{ 'active': showCustomForm }">
-        {{ showCustomForm ? 'Thêm task' : 'Tùy chọn' }}
-      </button>
-    </div>
-    <!-- Form tùy chọn thời gian -->
-    <div v-if="showCustomForm" class="custom-time-form">
-      <div class="form-row">
-        <label>Ngày thực hiện:</label>
-        <DatePicker
-            v-model="customTaskDate"
-            showIcon
-            dateFormat="dd/mm/yy"
-            placeholder="Chọn ngày"
-        />
-      </div>
-      <div class="form-row">
-        <label>Thời gian bắt đầu:</label>
-        <input type="time" v-model="customStartTime">
-      </div>
-      <div class="form-row">
-        <label>Thời gian kết thúc:</label>
-        <input type="time" v-model="customEndTime">
-      </div>
-    </div>
-
+    <CustomForm
+        :showCustomForm="showCustomForm"
+        v-model:customTaskDate="customTaskDate"
+        v-model:customStartTime="customStartTime"
+        v-model:customEndTime="customEndTime"
+        @toggleCustomForm="toggleCustomForm"
+        @addCustomTask="addCustomTask"
+    />
     <div class="timer">
       {{ formattedTime }}
     </div>
@@ -59,6 +40,7 @@
 import { ref, onMounted, computed } from 'vue'
 import DatePicker from 'primevue/datepicker'
 import TaskList from "@/components/TaskList.vue";
+import CustomForm from "@/components/CustomForm.vue";
 import { 
   formatTime, 
   formatDuration, 
@@ -69,7 +51,6 @@ import {
 } from '../utils/dateTimeUtils'
 
 //Biến trạng thái của bộ đếm thời gian
-const isRunning = ref(false)
 const elapsedTime = ref(0) //Thời gian đã trôi qua
 const startTime = ref(null)
 const timerInterval = ref(null) //Lưu id của bộ đếm giờ
@@ -79,6 +60,7 @@ const taskTitle = ref('')
 const tasks = ref([])
 const isEditing = ref(null)
 const currentTaskId = ref(null)
+const isRunning = ref(false)
 
 //Biến quản lý form
 const showCustomForm = ref(false)
@@ -112,7 +94,7 @@ const migrateExistingTasks = () => {
 
 const toggleTimer = () => {
   if (!isRunning.value) {
-    //Check nếu không nhập task
+    // Check nếu không nhập task
     if (!taskTitle.value.trim()) {
       alert('Hãy nhập task')
       taskTitle.value = ''
@@ -130,7 +112,7 @@ const toggleTimer = () => {
     clearInterval(timerInterval.value)
     isRunning.value = false
 
-    // If continuing an existing task
+    // Nếu tiếp tục một task
     if (currentTaskId.value) {
       const taskIndex = tasks.value.findIndex(task => task.id === currentTaskId.value)
       if (taskIndex !== -1) {
@@ -156,7 +138,7 @@ const toggleTimer = () => {
     }
   }
 }
-
+// Lưu task khi tạo mới hoặc cập nhật
 const saveTask = (options = {}) => {
   // Đảm bảo duration luôn là một số hợp lệ
   let duration = options.duration || elapsedTime.value;
@@ -394,40 +376,6 @@ onMounted(() => {
   text-align: center;
 }
 
-.tasks-list {
-  margin-top: 30px;
-}
-
-.task-item {
-  display: grid;
-  grid-template-columns: 1fr 200px;
-  gap: 20px;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 10px;
-  align-items: center;
-}
-
-.task-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.task-title {
-  display: flex;
-  font-weight: bold;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.task-date {
-  font-size: 0.85em;
-  color: #666;
-  margin-bottom: 5px;
-}
-
 .task-title input {
   width: 100%;
   padding: 4px 8px;
@@ -435,66 +383,8 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-.task-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 5px;
-}
-
-.task-duration {
-  white-space: nowrap;
-  color: #666;
-  font-size: 0.95em;
-  width: 200px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.edit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.edit-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 5px;
-}
-
-/* CSS cho form tùy chọn */
-.custom-option {
-  margin: 10px 0;
-  display: flex;
-  justify-content: center;
-}
-
-.custom-time-form {
-  margin: 20px 0;
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-}
-
-.form-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
 .form-row label {
   width: 150px;
   font-weight: bold;
-}
-.active-option {
-  background-color: #4caf50;
-  color: white;
 }
 </style>

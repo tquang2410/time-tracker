@@ -12,10 +12,8 @@
 <script setup>
 import TimeTracker from './components/TimeTracker.vue'
 
-import DatePicker from 'primevue/datepicker';
+// import DatePicker from 'primevue/datepicker';
 
-import { ref } from "vue";
-const calendar = ref(null);
 
 
 </script>

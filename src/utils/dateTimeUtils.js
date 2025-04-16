@@ -36,9 +36,17 @@ export const formatDuration = (duration) => {
  * Lấy ngày hiện tại theo định dạng YYYY-MM-DD
  * @returns {string} Ngày hiện tại định dạng YYYY-MM-DD
  */
+// export const getTodayDate = () => {
+//   const today = new Date();
+//   return today.toISOString().split('T')[0];
+// }
 export const getTodayDate = () => {
   const today = new Date();
-  return today.toISOString().split('T')[0];
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 /**
@@ -46,10 +54,21 @@ export const getTodayDate = () => {
  * @param {number} timestamp - Thời gian tính bằng milliseconds
  * @returns {string} Ngày định dạng YYYY-MM-DD
  */
+// export const timestampToDate = (timestamp) => {
+//   if (!timestamp) return getTodayDate();
+//   const date = new Date(timestamp);
+//   return date.toISOString().split('T')[0]; //làm lệch ngày 1 ngày nếu đang ở múi giờ Đông Nam Á (+7)
+// }
 export const timestampToDate = (timestamp) => {
   if (!timestamp) return getTodayDate();
   const date = new Date(timestamp);
-  return date.toISOString().split('T')[0];
+
+  // Lấy ngày tháng năm theo múi giờ địa phương
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 /**
